@@ -2,196 +2,394 @@
 <html lang="pl">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Logowanie i Rejestracja</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800&display=swap" rel="stylesheet" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .gender {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f4f4f4;
-      color: #333;
+      background: #1f1f1f;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      font-family: 'Montserrat', sans-serif;
+      height: 100vh;
+      margin: 0;
+      color: #eee;
+    }
+
+    h1 {
+      font-weight: bold;
+      margin: 0;
+    }
+
+    span {
+      font-size: 12px;
+    }
+
+    a {
+      color: #007bff;
+      font-size: 14px;
+      text-decoration: none;
+      margin-top: 15px;
     }
 
     .container {
-      max-width: 400px;
-      margin: 50px auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background-color: #2e2e2e;
+      border-radius: 10px;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+      position: relative;
+      overflow: hidden;
+      width: 768px;
+      max-width: 100%;
+      min-height: 480px;
     }
 
-    h2 {
+    form {
+      background-color: #3b3b3b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 0 50px;
+      height: 100%;
       text-align: center;
-      color: #0056b3;
-      margin-bottom: 20px;
     }
 
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
+    input {
+      background-color: #555;
+      border: none;
+      padding: 12px 15px;
+      margin: 8px 0;
+      width: 100%;
+      color: #eee;
+      border-radius: 8px;
     }
 
-    input[type="text"],
-    input[type="password"],
-    input[type="email"] {
-      width: calc(100% - 20px);
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+    input::placeholder {
+      color: #bbb;
+    }
+
+    .form-container {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      transition: all 0.6s ease-in-out;
+    }
+
+    .sign-in-container {
+      left: 0;
+      width: 50%;
+      z-index: 2;
+    }
+
+    .container.right-panel-active .sign-in-container {
+      transform: translateX(100%);
+    }
+
+    .sign-up-container {
+      left: 0;
+      width: 50%;
+      opacity: 0;
+      z-index: 1;
+    }
+
+    .container.right-panel-active .sign-up-container {
+      transform: translateX(100%);
+      opacity: 1;
+      z-index: 5;
+      animation: show 0.6s;
+    }
+
+    @keyframes show {
+
+      0%,
+      49.99% {
+        opacity: 0;
+        z-index: 1;
+      }
+
+      50%,
+      100% {
+        opacity: 1;
+        z-index: 5;
+      }
+    }
+
+    .overlay-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 50%;
+      height: 100%;
+      overflow: hidden;
+      transition: transform 0.6s ease-in-out;
+      z-index: 100;
+    }
+
+    .container.right-panel-active .overlay-container {
+      transform: translateX(-100%);
+    }
+
+    .overlay {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      color: #ffffff;
+      position: relative;
+      left: -100%;
+      height: 100%;
+      width: 200%;
+      transform: translateX(0);
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .container.right-panel-active .overlay {
+      transform: translateX(50%);
+    }
+
+    .overlay-panel {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 0 40px;
+      text-align: center;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      transform: translateX(0);
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .overlay-left {
+      transform: translateX(-20%);
+    }
+
+    .container.right-panel-active .overlay-left {
+      transform: translateX(0);
+    }
+
+    .overlay-right {
+      right: 0;
+      transform: translateX(0);
+    }
+
+    .container.right-panel-active .overlay-right {
+      transform: translateX(20%);
     }
 
     button {
-      width: 100%;
-      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #007bff;
       background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 12px 45px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: transform 80ms ease-in;
       cursor: pointer;
-      font-size: 16px;
+      margin-top: 10px;
     }
 
     button:hover {
       background-color: #0056b3;
     }
 
-    .message {
-      margin-top: 15px;
-      text-align: center;
+    .form-container {
+      overflow-y: auto;
+    }
+
+    button.ghost {
+      background-color: transparent;
+      border-color: #ffffff;
+    }
+
+    .message-div {
+      margin-top: 10px;
+      padding: 5px;
       font-weight: bold;
+      font-size: 13px;
     }
 
     .success {
-      color: green;
+      color: #4CAF50;
     }
 
     .error {
-      color: red;
+      color: #FF6347;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h2>Logowanie</h2>
-    <form id="loginForm">
-      <label for="loginUsername">Nazwa użytkownika:</label>
-      <input type="text" id="loginUsername" name="username" required>
+  <div class="container" id="container">
+    <!-- Rejestracja -->
+    <div class="form-container sign-up-container">
+      <form id="registerForm">
+        <h1>Utwórz konto</h1>
 
-      <label for="loginPassword">Hasło:</label>
-      <input type="password" id="loginPassword" name="password" required>
+        <input type="text" placeholder="Nazwa użytkownika" id="registerUsername" name="username" required />
+        <input type="email" placeholder="Adres email" id="registerEmail" name="email" required />
+        <input type="password" placeholder="Hasło" id="registerPassword" name="password" required />
 
-      <button type="submit">Zaloguj</button>
-      <div id="loginMessage" class="message"></div>
-    </form>
+        <!-- Dodane pola -->
+        <input type="text" placeholder="Imię" id="registerName" name="name" required />
+        <input type="text" placeholder="Nazwisko" id="registerLastName" name="last_name" required />
+        <input type="date" placeholder="Data urodzenia" id="registerBirthday" name="birthday" required />
 
-    <hr style="margin: 30px 0;">
+        <div class="gender">
+          <label><input type="radio" name="gender" value="M" required /> Mężczyzna</label>
+          <label><input type="radio" name="gender" value="K" required /> Kobieta</label>
+        </div>
 
-    <h2>Rejestracja</h2>
-    <form id="registerForm">
-      <label for="registerUsername">Nazwa użytkownika:</label>
-      <input type="text" id="registerUsername" name="username" required>
+        <input type="tel" placeholder="Numer telefonu" id="registerPhone" name="phone_number" required />
+        <input type="text" placeholder="Adres zamieszkania" id="registerAddress" name="address" required />
+        <!-- Koniec dodanych pól -->
 
-      <label for="registerEmail">Email:</label>
-      <input type="email" id="registerEmail" name="email" required>
+        <button type="submit">Zarejestruj się</button>
+        <div id="registerMessage" class="message-div"></div>
+      </form>
+    </div>
 
-      <label for="registerPassword">Hasło:</label>
-      <input type="password" id="registerPassword" name="password" required>
+    <!-- Logowanie -->
+    <div class="form-container sign-in-container">
+      <form id="loginForm">
+        <h1>Zaloguj się</h1>
+        <input type="text" placeholder="Nazwa użytkownika" id="loginUsername" name="username" required />
+        <input type="password" placeholder="Hasło" id="loginPassword" name="password" required />
+        <button type="submit">Zaloguj</button>
+        <div id="loginMessage" class="message-div"></div>
+      </form>
+    </div>
 
-      <button type="submit">NIECH KTOS TO OGARNIE BO TO AI</button>
-      <div id="registerMessage" class="message"></div>
-    </form>
+    <!-- Panele -->
+    <div class="overlay-container">
+      <div class="overlay">
+        <div class="overlay-panel overlay-left">
+          <h1>Witaj ponownie!</h1>
+          <p>Aby pozostać z nami, zaloguj się swoim kontem</p>
+          <button class="ghost" id="signIn">Zaloguj się</button>
+        </div>
+        <div class="overlay-panel overlay-right">
+          <h1>Cześć, przyjacielu!</h1>
+          <p>Wprowadź swoje dane i rozpocznij z nami podróż</p>
+          <button class="ghost" id="signUp">Zarejestruj się</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
+    const container = document.getElementById('container');
+    document.getElementById('signUp').addEventListener('click', () => {
+      container.classList.add('right-panel-active');
+    });
+    document.getElementById('signIn').addEventListener('click', () => {
+      container.classList.remove('right-panel-active');
+    });
 
     async function postData(url, data) {
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
       });
       return response;
     }
 
-    // --- Obsługa formularza logowania ---
     document.getElementById('loginForm').addEventListener('submit', async function (event) {
-      event.preventDefault(); // Zapobiega domyślnej wysyłce formularza
-
+      event.preventDefault();
       const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
       const messageDiv = document.getElementById('loginMessage');
-
       messageDiv.textContent = 'Ładowanie...';
-      messageDiv.className = 'message'; // Resetuj klasy
+      messageDiv.className = 'message-div';
 
       try {
         const response = await postData('/api/login', {username, password});
-
-        if (response.ok) { // Status 200 OK
-          const result = await response.json();
-          messageDiv.textContent = result.message;
-          messageDiv.classList.add('success');
-          console.log('Logowanie udane:', result);
-
-          window.location.href = '/user-dashboard.html'; // Przekierowanie na nową stronę
-
-        } else if (response.status === 401) { // Unauthorized
-          messageDiv.textContent = 'Błąd logowania: Nieprawidłowa nazwa użytkownika lub hasło.';
-          messageDiv.classList.add('error');
-        } else {
-          const errorResult = await response.json();
-          messageDiv.textContent = `Błąd: ${errorResult.message || response.statusText}`;
-          messageDiv.classList.add('error');
-        }
-      } catch (error) {
-        console.error('Błąd sieci/requestu:', error);
-        messageDiv.textContent = 'Wystąpił błąd podczas komunikacji z serwerem.';
-        messageDiv.classList.add('error');
-      }
-    });
-    // --- Obsługa formularza rejestracji ---
-    document.getElementById('registerForm').addEventListener('submit', async function (event) {
-      event.preventDefault(); // Zapobiega domyślnej wysyłce formularza
-
-      const username = document.getElementById('registerUsername').value;
-      const email = document.getElementById('registerEmail').value;
-      const password = document.getElementById('registerPassword').value;
-      const messageDiv = document.getElementById('registerMessage');
-
-      messageDiv.textContent = 'Ładowanie...';
-      messageDiv.className = 'message'; // Resetuj klasy
-
-      try {
-        const response = await postData('/api/register', {username, email, password});
-
         if (response.ok) {
           const result = await response.json();
           messageDiv.textContent = result.message;
           messageDiv.classList.add('success');
-          console.log('Rejestracja udana:', result);
-        } else if (response.status === 409) { // Conflict
-          const errorResult = await response.json();
-          messageDiv.textContent = errorResult.message;
+          window.location.href = '/user-dashboard.html';
+        } else if (response.status === 401) {
+          messageDiv.textContent = 'Błąd logowania: Nieprawidłowa nazwa użytkownika lub hasło.';
           messageDiv.classList.add('error');
-        }
-        else {
-          const errorResult = await response.json();
+        } else {
+          const errorResult = await response.json().catch(() => ({}));
           messageDiv.textContent = `Błąd: ${errorResult.message || response.statusText}`;
           messageDiv.classList.add('error');
         }
       } catch (error) {
-        console.error('Błąd sieci/requestu:', error);
-        messageDiv.textContent = 'Wystąpił błąd podczas komunikacji z serwerem.';
+        console.error(error);
+        messageDiv.textContent = 'Błąd połączenia z serwerem.';
         messageDiv.classList.add('error');
       }
     });
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("registerUsername").value;
+      const email = document.getElementById("registerEmail").value;
+      const password = document.getElementById("registerPassword").value;
+
+      const name = document.getElementById("registerName").value;
+      const last_name = document.getElementById("registerLastName").value;
+      const birthday = document.getElementById("registerBirthday").value;
+      const gender = document.querySelector('input[name="gender"]:checked')?.value;
+      const phone_number = document.getElementById("registerPhone").value;
+      const address = document.getElementById("registerAddress").value;
+
+      const messageDiv = document.getElementById("registerMessage");
+
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username,
+            email,
+            password,
+            name,
+            last_name,
+            birthday,
+            gender,
+            phone_number,
+            address
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          messageDiv.textContent = "Rejestracja zakończona sukcesem!";
+          messageDiv.style.color = "green";
+          document.getElementById("registerForm").reset();
+        } else {
+          messageDiv.textContent = result.message || "Wystąpił błąd podczas rejestracji.";
+          messageDiv.style.color = "red";
+        }
+      } catch (error) {
+        messageDiv.textContent = "Błąd połączenia z serwerem.";
+        messageDiv.style.color = "red";
+      }
+    }); 
   </script>
 </body>
 

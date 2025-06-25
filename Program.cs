@@ -43,4 +43,4 @@ app.MapGet("/", (HttpContext context) =>
 
 app.Run();
 public record LoginRequest(string Username, string Password);
-public record RegisterRequest(string Username, string Email, string Password);
+public record RegisterRequest(string Username, string Email, string Password, string Name, string LastName, string Birthday, string Gender, string PhoneNumber, string Address);
