@@ -8,10 +8,10 @@ namespace Validation
         private String Login { get; set; }
         private String Password { get; set; }
 
-        public FetchUser(string login, string password)
+        public FetchUser(LoginRequest req)
         {
-            string encryptedLogin = Md5.Encrypt(login);
-            string encryptedPassword = Md5.Encrypt(password);
+            string encryptedLogin = Md5.Encrypt(req.Username);
+            string encryptedPassword = Md5.Encrypt(req.Password);
             this.Login = encryptedLogin;
             this.Password = encryptedPassword;
         }

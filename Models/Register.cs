@@ -16,27 +16,19 @@ namespace Validation
         private string Address { get; set; }
 
         public CreateUser(
-                string login,
-                string email,
-                string password,
-                string name,
-                string lastname,
-                string birthday,
-                string gender,
-                string phonenumber,
-                string address)
+                RegisterRequest req)
         {
-            string encryptedLogin = Md5.Encrypt(login);
-            string encryptedPassword = Md5.Encrypt(password);
+            string encryptedLogin = Md5.Encrypt(req.Username);
+            string encryptedPassword = Md5.Encrypt(req.Password);
             this.Login = encryptedLogin;
-            this.Email = email;
             this.Password = encryptedPassword;
-            this.Name = name;
-            this.LastName = lastname;
-            this.Birthday = birthday;
-            this.Gender = gender;
-            this.PhoneNumber = phonenumber;
-            this.Address = address;
+            this.Email = req.Email;
+            this.Name = req.Name;
+            this.LastName = req.LastName;
+            this.Birthday = req.Birthday;
+            this.Gender = req.Gender;
+            this.PhoneNumber = req.PhoneNumber;
+            this.Address = req.Address;
         }
 
         public void Push()

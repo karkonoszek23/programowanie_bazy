@@ -1,5 +1,4 @@
 using Validation;
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 var app = builder.Build();
@@ -9,7 +8,7 @@ app.UseStaticFiles();
 // /api/login do requestow
 app.MapPost("/api/login", async (LoginRequest req) =>
 {
-    FetchUser user = new FetchUser(req.Username, req.Password);
+    FetchUser user = new FetchUser(req);
     if (user.AmIGood())
     {
         return Results.Ok(new { message = "Logowanie udane!", token = "jakis_token_jwt" });
@@ -24,7 +23,7 @@ app.MapPost("/api/login", async (LoginRequest req) =>
 
 app.MapPost("/api/register", async (RegisterRequest request) =>
 {
-    Console.WriteLine($"Próba rejestracji: Użytkownik={request.Username}, Email={request.Email}, Hasło={request.Password}");
+    // Console.WriteLine($"Próba rejestracji: Użytkownik={request.Username}, Email={request.Email}, Hasło={request.Password}");
 
     if (request.Username == "existinguser")
     {
