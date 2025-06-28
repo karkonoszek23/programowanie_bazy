@@ -11,6 +11,6 @@ CREATE TABLE IF NOT EXISTS Users(
 	last_name VARCHAR(100) NOT NULL,
 	birthday DATE NOT NULL,
 	gender ENUM('M', 'F', 'N') DEFAULT 'N',
-	phone_number INT NOT NULL,
+	phone_number CHAR(9) NOT NULL,
 	address VARCHAR(200) NOT NULL
 )
