@@ -5,10 +5,9 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// /api/login do requestow
 app.MapPost("/api/login", async (LoginRequest req) =>
 {
-    FetchUser user = new FetchUser(req);
+    UserLogin user = new UserLogin(req);
     if (user.AmIGood())
     {
         return Results.Ok(new { message = "Logowanie udane!", token = "jakis_token_jwt" });
@@ -23,8 +22,6 @@ app.MapPost("/api/login", async (LoginRequest req) =>
 
 app.MapPost("/api/register", async (RegisterRequest request) =>
 {
-    // Console.WriteLine($"Próba rejestracji: Użytkownik={request.Username}, Email={request.Email}, Hasło={request.Password}");
-
     if (request.Username == "existinguser")
     {
         return Results.Conflict(new { message = "Użytkownik o tej nazwie już istnieje." });

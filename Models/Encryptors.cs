@@ -9,12 +9,12 @@ namespace MD5
     {
         private static string Bytes2String(byte[] arrInput)
         {
-            StringBuilder sOutput = new StringBuilder(arrInput.Length);
+            StringBuilder hash = new StringBuilder(arrInput.Length);
             for (int idx = 0; idx < arrInput.Length; idx++)
             {
-                sOutput.Append(arrInput[idx].ToString("X2"));
+                hash.Append(arrInput[idx].ToString("X2"));
             }
-            return sOutput.ToString();
+            return hash.ToString();
         }
 
         public static string Encrypt(string input)
@@ -26,11 +26,7 @@ namespace MD5
             return Bytes2String(tmpHash);
         }
     }
-
-
-
 }
-
 
 namespace AES
 {
