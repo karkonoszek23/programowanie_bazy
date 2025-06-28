@@ -3,12 +3,12 @@ using MD5;
 
 namespace Validation
 {
-    public class FetchUser
+    public class UserLogin
     {
         private String Login { get; set; }
         private String Password { get; set; }
 
-        public FetchUser(LoginRequest req)
+        public UserLogin(LoginRequest req)
         {
             string encryptedLogin = Md5.Encrypt(req.Username);
             string encryptedPassword = Md5.Encrypt(req.Password);
@@ -16,10 +16,10 @@ namespace Validation
             this.Password = encryptedPassword;
         }
 
-        public bool AmIGood()
+        private string[] FetchFields()
         {
-            // request do bazy
-            return 1 == 1;
+            return [Login, Password];
+
         }
 
     }

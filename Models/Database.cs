@@ -1,4 +1,5 @@
 using MySql.Data.MySqlClient;
+using Validation;
 namespace Database
 {
     public class DBConnection
@@ -6,6 +7,9 @@ namespace Database
         const string DbAddress = "127.0.0.1";
         const string Port = "3306";
         const string DbName = "shop";
+        const string UserTable = "Users";
+        const string UserLogins = "UserLogIns";
+
         private string UserName { get; set; }
         private string Password { get; set; }
         private string connInfo { get; set; }
@@ -17,7 +21,16 @@ namespace Database
             connInfo = $"Server={DbAddress};Port={Port};Database={DbName};Uid={UserName};Pwd={Password};";
         }
 
-        public void MakeQuery(string query)
+
+
+        public void RegisterUser(string[] userData)
+        {
+
+        }
+
+
+
+        private void MakeQuery(string query)
         {
             using (MySqlConnection conn = new MySqlConnection(connInfo))
             {
