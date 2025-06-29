@@ -343,17 +343,16 @@
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const username = document.getElementById("registerUsername").value;
-      const email = document.getElementById("registerEmail").value;
-      const password = document.getElementById("registerPassword").value;
+      const Username = document.getElementById("registerUsername").value;
+      const Email = document.getElementById("registerEmail").value;
+      const Password = document.getElementById("registerPassword").value;
 
-      const name = document.getElementById("registerName").value;
-      const last_name = document.getElementById("registerLastName").value;
-      const birthday = document.getElementById("registerBirthday").value;
-      const gender = document.querySelector('input[name="gender"]:checked')?.value;
-      const phone_number = document.getElementById("registerPhone").value;
-      const address = document.getElementById("registerAddress").value;
-
+      const Name = document.getElementById("registerName").value;
+      const LastName = document.getElementById("registerLastName").value;
+      const Birthday = document.getElementById("registerBirthday").value;
+      const Gender = document.querySelector('input[name="gender"]:checked')?.value;
+      const PhoneNumber = document.getElementById("registerPhone").value;
+      const Address = document.getElementById("registerAddress").value;
       const messageDiv = document.getElementById("registerMessage");
 
       try {
@@ -363,15 +362,15 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            username,
-            email,
-            password,
-            name,
-            last_name,
-            birthday,
-            gender,
-            phone_number,
-            address
+            Username,
+            Email,
+            Password,
+            Name,
+            LastName,
+            Birthday,
+            Gender,
+            PhoneNumber,
+            Address
           })
         });
 

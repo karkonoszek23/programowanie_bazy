@@ -1,10 +1,11 @@
 using MySql.Data.MySqlClient;
-using Validation;
+using System;
+
 namespace Database
 {
     public class DBConnection
     {
-        const string DbAddress = "127.0.0.1";
+        const string DbAddress = "localhost";
         const string Port = "3306";
         const string DbName = "shop";
         const string UserTable = "Users";
@@ -21,32 +22,10 @@ namespace Database
             connInfo = $"Server={DbAddress};Port={Port};Database={DbName};Uid={UserName};Pwd={Password};";
         }
 
-        public void LoginUser(string[] userData)
+        public bool LoginUser(string username, string password)
         {
-            string userLoginQuery = String.Format(
-                    "SELECT user_in_db({0}, {1})", userData[0], userData[1]
-                    );
-            MakeQuery(userLoginQuery);
-        }
+            string query = "SELECT user_in_db(@p_username, @p_password)";
 
-        public void RegisterUser(string[] userData)
-        {
-            string userAddQuery = String.Format(
-                    "CALL add_user_full_info({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})",
-                    userData[0],
-                    userData[1],
-                    userData[2],
-                    userData[3],
-                    userData[4],
-      userData[5],
-                    userData[6],
-                    userData[7],
-                    userData[8]);
-            MakeQuery(userAddQuery);
-        }
-
-        private void MakeQuery(string query)
-        {
             using (MySqlConnection conn = new MySqlConnection(connInfo))
             {
                 try
@@ -54,18 +33,61 @@ namespace Database
                     conn.Open();
                     using (MySqlCommand command = new MySqlCommand(query, conn))
                     {
-                        using (MySqlDataReader reader = command.ExecuteReader())
+                        command.Parameters.AddWithValue("@p_username", username);
+                        command.Parameters.AddWithValue("@p_password", password);
+
+
+                        object result = command.ExecuteScalar();
+
+                        if (result != null && result != DBNull.Value)
                         {
-                            while (reader.Read())
-                            {
-                                Console.WriteLine($"Id: {reader["id"]}, Name: {reader["name"]}");
-                            }
+                            return Convert.ToInt32(result) == 1;
                         }
+                        return false;
                     }
                 }
                 catch (MySqlException ex)
                 {
-                    Console.WriteLine($"{ex.Message}");
+                    Console.Error.WriteLine($"Database login error for user '{username}': {ex.Message}");
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"An unexpected error occurred during login for user '{username}': {ex.Message}");
+                    return false;
+                }
+            }
+        }
+
+        public void RegisterUser(string[] userData)
+        {
+            string query = "CALL add_user_full_info(@param0, @param1, @param2, @param3, @param4, @param5, @param6, @param7, @param8)";
+
+            using (MySqlConnection conn = new MySqlConnection(connInfo))
+            {
+                try
+                {
+                    conn.Open();
+                    using (MySqlCommand command = new MySqlCommand(query, conn))
+                    {
+                        for (int i = 0; i < userData.Length; i++)
+                        {
+                            command.Parameters.AddWithValue($"@param{i}", userData[i]);
+                        }
+
+                        int rowsAffected = command.ExecuteNonQuery();
+                        Console.WriteLine($"User registration procedure executed. Rows affected (if any from procedure): {rowsAffected}");
+                    }
+                }
+                catch (MySqlException ex)
+                {
+                    Console.Error.WriteLine($"Database registration error: {ex.Message}");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"An unexpected error occurred during user registration: {ex.Message}");
+                    throw;
                 }
             }
         }

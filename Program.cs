@@ -1,4 +1,5 @@
 using Validation;
+using Database;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 var app = builder.Build();
@@ -8,8 +9,19 @@ app.UseStaticFiles();
 app.MapPost("/api/login", async (LoginRequest req) =>
 {
     UserLogin user = new UserLogin(req);
-    if (user.AmIGood())
+
+    // +-------------------------------------------------------+
+    // | CREATE USER 'admin'@'localhost' IDENTIFIED BY 'admin';|
+    // | GRANT ALL PRIVILEGES ON shop.* TO 'admin'@'localhost';| 
+    // +-------------------------------------------------------+ 
+
+    DBConnection dbcontext = new DBConnection("admin", "admin");
+    var fields = user.FetchFields();
+    string login = fields[0];
+    string passwd = fields[1];
+    if (dbcontext.LoginUser(login, passwd))
     {
+        Console.WriteLine("Zalogowano uzytkownika.");
         return Results.Ok(new { message = "Logowanie udane!", token = "jakis_token_jwt" });
     }
     else
@@ -22,11 +34,27 @@ app.MapPost("/api/login", async (LoginRequest req) =>
 
 app.MapPost("/api/register", async (RegisterRequest request) =>
 {
-    if (request.Username == "existinguser")
+    if (request is null)
     {
-        return Results.Conflict(new { message = "Użytkownik o tej nazwie już istnieje." });
+        return Results.Unauthorized();
     }
-    return Results.Created("/api/register", new { message = "Rejestracja udana!" });
+    else
+    {
+        Console.WriteLine(request);
+    }
+    UserRegistration tempUser = new UserRegistration(request);
+    if (tempUser.AmIGood() == 0)
+    {
+        DBConnection dbcontext = new DBConnection("admin", "admin");
+        dbcontext.RegisterUser(tempUser.FetchFields());
+        Console.WriteLine("Zarejestrowano uzytkownika.");
+        return Results.Created("/api/register", new { message = "Rejestracja udana!" });
+    }
+    else
+    {
+        Console.WriteLine($"Kod bledu: {tempUser.AmIGood()}");
+    }
+    return Results.Unauthorized();
 })
 .WithName("Register")
 .WithOpenApi();

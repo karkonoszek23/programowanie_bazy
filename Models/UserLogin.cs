@@ -16,7 +16,7 @@ namespace Validation
             this.Password = encryptedPassword;
         }
 
-        private string[] FetchFields()
+        public string[] FetchFields()
         {
             return [Login, Password];
 

@@ -43,12 +43,12 @@ namespace Validation
 
         public bool IsGenderCorrect()
         {
-            return Gender.Equals('F') || Gender.Equals('M') || Gender.Equals('N');
+            return Gender == "K" || Gender == "M" || Gender == "N";
         }
 
         public bool IsPhoneNumberCorrect()
         {
-            return PhoneNumber.Length == 9;
+            return PhoneNumber.Length == 9 && PhoneNumber is not null;
         }
 
         public int AmIGood()
