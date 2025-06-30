@@ -142,20 +142,21 @@ public class DBConnection
         string query = @"
             SELECT
                 CI.id AS cart_item_id,
-                CI.itemid,
-                IS.name AS product_name,
-                IS.description,
-                IS.price,
+                CI.id,
+                IS_.name AS product_name,
+                IS_.description,
+                IS_.price,
                 CI.quantity,
-                (IS.price * CI.quantity) AS total_item_price
+                (IS_.price * CI.quantity) AS total_item_price
             FROM
                 CartItems CI
             JOIN
-                ItemsInShop IS ON CI.itemid = IS.id
+                ItemsInShop IS_ ON CI.id = IS_.id
             JOIN
                 Carts C ON CI.cartid = C.id
             WHERE
-                C.userid = @userId AND C.status = 'Pending'";
+                C.userid = @userId AND C.status = 'Pending';";
+
         using (MySqlConnection conn = GetConnection())
         {
             try
@@ -164,6 +165,7 @@ public class DBConnection
                 using (MySqlCommand command = new MySqlCommand(query, conn))
                 {
                     command.Parameters.AddWithValue("@userId", userId);
+                    Console.WriteLine($"User with ID: {userId} requested.");
                     using (MySqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
