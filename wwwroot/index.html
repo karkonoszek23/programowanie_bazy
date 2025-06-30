@@ -62,7 +62,19 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      padding: 0 50px;
+      padding: 20px;
+      height: 130%;
+      /* Adjusted for more content */
+      text-align: center;
+    }
+
+    #loginForm {
+      background-color: #3b3b3b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
       height: 100%;
       text-align: center;
     }
@@ -210,6 +222,7 @@
 
     .form-container {
       overflow-y: auto;
+      /* Enable scrolling for forms if content overflows */
     }
 
     button.ghost {
@@ -236,16 +249,13 @@
 
 <body>
   <div class="container" id="container">
-    <!-- Rejestracja -->
     <div class="form-container sign-up-container">
       <form id="registerForm">
         <h1>Utwórz konto</h1>
-
         <input type="text" placeholder="Nazwa użytkownika" id="registerUsername" name="username" required />
         <input type="email" placeholder="Adres email" id="registerEmail" name="email" required />
         <input type="password" placeholder="Hasło" id="registerPassword" name="password" required />
 
-        <!-- Dodane pola -->
         <input type="text" placeholder="Imię" id="registerName" name="name" required />
         <input type="text" placeholder="Nazwisko" id="registerLastName" name="last_name" required />
         <input type="date" placeholder="Data urodzenia" id="registerBirthday" name="birthday" required />
@@ -257,14 +267,12 @@
 
         <input type="tel" placeholder="Numer telefonu" id="registerPhone" name="phone_number" required />
         <input type="text" placeholder="Adres zamieszkania" id="registerAddress" name="address" required />
-        <!-- Koniec dodanych pól -->
 
         <button type="submit">Zarejestruj się</button>
         <div id="registerMessage" class="message-div"></div>
       </form>
     </div>
 
-    <!-- Logowanie -->
     <div class="form-container sign-in-container">
       <form id="loginForm">
         <h1>Zaloguj się</h1>
@@ -275,7 +283,6 @@
       </form>
     </div>
 
-    <!-- Panele -->
     <div class="overlay-container">
       <div class="overlay">
         <div class="overlay-panel overlay-left">
@@ -294,9 +301,11 @@
 
   <script>
     const container = document.getElementById('container');
+
     document.getElementById('signUp').addEventListener('click', () => {
       container.classList.add('right-panel-active');
     });
+
     document.getElementById('signIn').addEventListener('click', () => {
       container.classList.remove('right-panel-active');
     });
@@ -304,7 +313,9 @@
     async function postData(url, data) {
       const response = await fetch(url, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(data)
       });
       return response;
@@ -324,7 +335,9 @@
           const result = await response.json();
           messageDiv.textContent = result.message;
           messageDiv.classList.add('success');
-          window.location.href = '/user-dashboard.html';
+          localStorage.setItem('token', result.token);
+          localStorage.setItem('userId', result.userId);
+          window.location.href = `/user-dashboard.html?userId=${result.userId}`;
         } else if (response.status === 401) {
           messageDiv.textContent = 'Błąd logowania: Nieprawidłowa nazwa użytkownika lub hasło.';
           messageDiv.classList.add('error');
@@ -340,55 +353,43 @@
       }
     });
 
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    document.getElementById('registerForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const username = document.getElementById('registerUsername').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const name = document.getElementById('registerName').value;
+      const lastName = document.getElementById('registerLastName').value;
+      const birthday = document.getElementById('registerBirthday').value;
+      const gender = document.querySelector('input[name="gender"]:checked')?.value;
+      const phoneNumber = document.getElementById('registerPhone').value;
+      const address = document.getElementById('registerAddress').value;
 
-      const Username = document.getElementById("registerUsername").value;
-      const Email = document.getElementById("registerEmail").value;
-      const Password = document.getElementById("registerPassword").value;
-
-      const Name = document.getElementById("registerName").value;
-      const LastName = document.getElementById("registerLastName").value;
-      const Birthday = document.getElementById("registerBirthday").value;
-      const Gender = document.querySelector('input[name="gender"]:checked')?.value;
-      const PhoneNumber = document.getElementById("registerPhone").value;
-      const Address = document.getElementById("registerAddress").value;
-      const messageDiv = document.getElementById("registerMessage");
+      const messageDiv = document.getElementById('registerMessage');
+      messageDiv.textContent = 'Rejestrowanie...';
+      messageDiv.className = 'message-div';
 
       try {
-        const response = await fetch("/api/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            Username,
-            Email,
-            Password,
-            Name,
-            LastName,
-            Birthday,
-            Gender,
-            PhoneNumber,
-            Address
-          })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          messageDiv.textContent = "Rejestracja zakończona sukcesem!";
-          messageDiv.style.color = "green";
-          document.getElementById("registerForm").reset();
+        const response = await postData('/api/register', {username, email, password, name, lastName, birthday, gender, phoneNumber, address});
+        if (response.ok) {
+          const result = await response.json();
+          messageDiv.textContent = 'Rejestracja zakończona sukcesem! Możesz się teraz zalogować.';
+          messageDiv.classList.add('success');
+          document.getElementById('registerForm').reset();
+          container.classList.remove('right-panel-active');
+          document.getElementById('loginUsername').value = username;
+          document.getElementById('loginPassword').value = password;
         } else {
-          messageDiv.textContent = result.message || "Wystąpił błąd podczas rejestracji.";
-          messageDiv.style.color = "red";
+          const errorResult = await response.json().catch(() => ({}));
+          messageDiv.textContent = errorResult.message || 'Wystąpił błąd podczas rejestracji';
+          messageDiv.classList.add('error');
         }
       } catch (error) {
-        messageDiv.textContent = "Błąd połączenia z serwerem.";
-        messageDiv.style.color = "red";
+        console.error(error);
+        messageDiv.textContent = 'Błąd połączenia z serwerem.';
+        messageDiv.classList.add('error');
       }
-    }); 
+    });
   </script>
 </body>
 
