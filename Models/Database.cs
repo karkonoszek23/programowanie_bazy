@@ -52,7 +52,14 @@ public class DBConnection
 
     public int GetUserId(string username)
     {
-        string query = "SELECT fetch_user_id(@login)";
+        string query = @"
+            SELECT 
+                user_id 
+            FROM 
+                UserCredentials UC
+            WHERE
+                UC.login = @login
+            ";
         using (MySqlConnection conn = GetConnection())
         {
             try
