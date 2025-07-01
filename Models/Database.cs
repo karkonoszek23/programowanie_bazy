@@ -47,13 +47,6 @@ public class DBConnection
                 Console.Error.WriteLine($"Błąd bazy danych podczas logowania: {ex.Message}");
                 return false;
             }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
-            }
         }
     }
 
@@ -76,13 +69,6 @@ public class DBConnection
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas pobierania ID użytkownika: {ex.Message}");
                 return -1;
-            }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
             }
         }
     }
@@ -126,13 +112,6 @@ public class DBConnection
                 Console.Error.WriteLine($"Błąd formatu danych podczas rejestracji użytkownika: {ex.Message}. Sprawdź format daty urodzenia i numeru telefonu.");
                 throw;
             }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
-            }
         }
     }
 
@@ -141,8 +120,7 @@ public class DBConnection
         var cartItems = new List<CartItem>();
         string query = @"
             SELECT
-                CI.id AS cart_item_id,
-                CI.id,
+                CI.itemid AS item_id,
                 IS_.name AS product_name,
                 IS_.description,
                 IS_.price,
@@ -151,7 +129,7 @@ public class DBConnection
             FROM
                 CartItems CI
             JOIN
-                ItemsInShop IS_ ON CI.id = IS_.id
+                ItemsInShop IS_ ON CI.itemid = IS_.id
             JOIN
                 Carts C ON CI.cartid = C.id
             WHERE
@@ -187,13 +165,6 @@ public class DBConnection
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas pobierania przedmiotów z koszyka: {ex.Message}");
             }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
-            }
         }
         return cartItems;
     }
@@ -204,14 +175,14 @@ public class DBConnection
         string query = @"
             SELECT
                 C.id AS cart_id,
-                COUNT(CI.id) AS item_count,
+                COUNT(CI.itemid) AS item_count,
                 COALESCE(SUM(IS.price * CI.quantity), 0) AS total_value
             FROM
                 Carts C
             LEFT JOIN
                 CartItems CI ON C.id = CI.cartid
             LEFT JOIN
-                ItemsInShop IS ON CI.itemid = IS.id  -- Corrected join condition
+                ItemsInShop IS ON CI.itemid = IS.id
             WHERE
                 C.userid = @userId AND C.status = 'Pending'
             GROUP BY
@@ -248,13 +219,6 @@ public class DBConnection
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas pobierania informacji o koszyku: {ex.Message}");
             }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
-            }
         }
         return cartInfo;
     }
@@ -278,13 +242,6 @@ public class DBConnection
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas tworzenia nowego koszyka: {ex.Message}");
                 return null;
-            }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
             }
         }
     }
@@ -326,13 +283,6 @@ public class DBConnection
                 Console.Error.WriteLine($"Błąd bazy danych podczas dodawania do koszyka: {ex.Message}");
                 return false;
             }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
-            }
         }
     }
 
@@ -344,7 +294,7 @@ public class DBConnection
         string query = @"
             UPDATE CartItems
             SET quantity = GREATEST(0, quantity - @quantity)
-            WHERE itemid = @itemId AND cartid = @cartId; -- Changed id to itemid
+            WHERE itemid = @itemId AND cartid = @cartId;
 
             DELETE FROM CartItems WHERE quantity = 0 AND cartid = @cartId;";
 
@@ -366,13 +316,6 @@ public class DBConnection
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas usuwania z koszyka: {ex.Message}");
                 return false;
-            }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
             }
         }
     }
@@ -400,13 +343,6 @@ public class DBConnection
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas czyszczenia koszyka: {ex.Message}");
                 return false;
-            }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
             }
         }
     }
@@ -442,13 +378,6 @@ public class DBConnection
             catch (MySqlException ex)
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas pobierania przedmiotów ze sklepu: {ex.Message}");
-            }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
             }
         }
         return shopItems;
@@ -487,13 +416,6 @@ public class DBConnection
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas pobierania przedmiotu ze sklepu po ID: {ex.Message}");
             }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
-            }
         }
         return shopItem;
     }
@@ -522,8 +444,6 @@ public class DBConnection
         }
 
         string updateCartStatusQuery = "UPDATE Carts SET status = 'Ordered' WHERE id = @cartId";
-
-        // Insert into Orders with total_amount and order_date
         string insertOrderQuery = "INSERT INTO Orders (userid, cartid, total_amount, order_date) VALUES (@userId, @cartId, @totalAmount, @orderDate); SELECT LAST_INSERT_ID();";
 
         using (MySqlConnection conn = GetConnection())
@@ -571,13 +491,6 @@ public class DBConnection
                 Console.Error.WriteLine($"Błąd podczas składania zamówienia: {ex.Message}");
                 return false;
             }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
-            }
         }
     }
 
@@ -614,13 +527,6 @@ public class DBConnection
             catch (MySqlException ex)
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas pobierania zamówień użytkownika: {ex.Message}");
-            }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
             }
         }
         return orders;
@@ -670,13 +576,6 @@ public class DBConnection
             catch (MySqlException ex)
             {
                 Console.Error.WriteLine($"Błąd bazy danych podczas pobierania przedmiotów zamówienia: {ex.Message}");
-            }
-            finally
-            {
-                if (conn.State == System.Data.ConnectionState.Open)
-                {
-                    conn.Close();
-                }
             }
         }
         return orderItems;

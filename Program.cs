@@ -9,20 +9,22 @@ app.UseStaticFiles();
 app.MapPost("/api/login", async (LoginRequest req) =>
 {
     UserLogin user = new UserLogin(req);
-
-    // +-------------------------------------------------------+
-    // | CREATE USER 'admin'@'localhost' IDENTIFIED BY 'admin';|
-    // | GRANT ALL PRIVILEGES ON shop.* TO 'admin'@'localhost';|
-    // +-------------------------------------------------------+
-
     DBConnection dbcontext = new DBConnection("admin", "admin");
     var fields = user.FetchFields();
     string login = fields[0];
     string passwd = fields[1];
+
     if (dbcontext.LoginUser(login, passwd))
     {
         Console.WriteLine("Zalogowano uzytkownika.");
-        return Results.Ok(new { message = "Logowanie udane!", token = "jakis_token_jwt", userId = 123 }); // Przykładowe userId
+        // Pobierz prawdziwe ID użytkownika
+        int userId = dbcontext.GetUserId(login);
+        return Results.Ok(new
+        {
+            message = "Logowanie udane!",
+            token = "jakis_token_jwt",
+            userId = userId // Używamy rzeczywistego ID użytkownika
+        });
     }
     else
     {
