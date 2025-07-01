@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Użytkownika</title>
+  <title>Panel Sklepu</title>
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800&display=swap" rel="stylesheet" />
   <style>
-    * {
+    <style>* {
       box-sizing: border-box;
     }
 
@@ -15,62 +15,470 @@
       background-color: #1f1f1f;
       color: #eee;
       font-family: 'Montserrat', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       min-height: 100vh;
       margin: 0;
       padding: 20px;
     }
 
-    .dashboard-container {
-      background-color: #2e2e2e;
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
-        0 10px 10px rgba(0, 0, 0, 0.22);
-      text-align: center;
-      max-width: 600px;
-      width: 100%;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    h1 {
-      color: #ffffff;
-      margin-bottom: 20px;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
     }
 
-    p {
-      font-size: 1.1em;
-      color: #ccc;
-      margin-bottom: 15px;
-    }
-
-    a {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 30px;
-      background-color: #007bff;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 20px;
+    header button {
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 0.9em;
       font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .cart-button {
+      background-color: #007bff;
+      color: white;
+      margin-right: 10px;
+    }
+
+    .cart-button:hover {
+      background-color: #0056b3;
+    }
+
+    .logout-button {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .logout-button:hover {
+      background-color: #5a6268;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: #2e2e2e;
+      border-radius: 8px;
+      padding: 15px;
+      transition: transform 0.3s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-card h3 {
+      margin-top: 0;
+      color: #007bff;
+    }
+
+    .product-card p {
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+
+    .product-card .price {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+
+    .product-card button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
       transition: background-color 0.3s ease;
     }
 
-    a:hover {
+    .product-card button:hover {
       background-color: #0056b3;
+    }
+
+    .cart-modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .cart-content {
+      background-color: #2e2e2e;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .close-button {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .cart-items-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #444;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-total {
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .cart-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .cart-actions button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .cart-actions button:hover {
+      background-color: #0056b3;
+    }
+
+    .cart-actions .clear-button {
+      background-color: #dc3545;
+    }
+
+    .cart-actions .clear-button:hover {
+      background-color: #c82333;
     }
   </style>
 </head>
 
 <body>
-  <div class="dashboard-container">
-    <h1>Witaj w Panelu Użytkownika!</h1>
-    <p>Jesteś zalogowany. Możesz teraz korzystać z funkcji dostępnych dla użytkowników.</p>
-    <p>To miejsce na twoje dane, quizy, statystyki lub inne elementy systemu.</p>
-    <a href="/">Wyloguj się</a>
+  <div class="container">
+    <header>
+      <h1>Panel Sklepu</h1>
+      <div>
+        <button id="cartButton" class="cart-button">Koszyk (<span id="cartItemCount">0</span>)</button>
+        <button id="logoutButton" class="logout-button">Wyloguj</button>
+      </div>
+    </header>
+
+    <main>
+      <h2>Dostępne produkty</h2>
+      <div id="productsGrid" class="products-grid">
+      </div>
+    </main>
   </div>
+
+  <div id="cartModal" class="cart-modal">
+    <div class="cart-content">
+      <span class="close-button">&times;</span>
+      <h2>Twój Koszyk</h2>
+      <ul id="modalCartItemsList" class="cart-items-list">
+      </ul>
+      <div class="cart-total">
+        Całkowita wartość: <span id="cartTotalValue">$0.00</span>
+      </div>
+      <div class="cart-actions">
+        <button id="clearCartButton" class="clear-button">Wyczyść koszyk</button>
+        <button id="orderButton">Złóż zamówienie</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUserId = null;
+    let shopItems = [];
+    let userCartItems = [];
+    const productsGrid = document.getElementById('productsGrid');
+    const cartButton = document.getElementById('cartButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const cartModal = document.getElementById('cartModal');
+    const closeCart = document.querySelector('.close-button');
+    const modalCartItemsList = document.getElementById('modalCartItemsList');
+    const cartItemCountSpan = document.getElementById('cartItemCount');
+    const cartTotalValueSpan = document.getElementById('cartTotalValue');
+    const clearCartButton = document.getElementById('clearCartButton');
+    const orderButton = document.getElementById('orderButton');
+
+    async function fetchData(url, options = {}) {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        const errorText = await response.text();
+        try {
+          const errorJson = JSON.parse(errorText);
+          throw new Error(errorJson.message || `Błąd HTTP: ${response.status} - ${response.statusText}`);
+        } catch {
+          throw new Error(`Błąd HTTP: ${response.status} - ${response.statusText} - ${errorText}`);
+        }
+      }
+      return response.json();
+    }
+
+    async function fetchShopItems() {
+      try {
+        shopItems = await fetchData('/api/shop/items');
+        renderShopItems();
+      } catch (error) {
+        console.error('Błąd podczas pobierania produktów sklepu:', error);
+        productsGrid.innerHTML = '<p>Nie udało się załadować produktów.</p>';
+      }
+    }
+
+    function renderShopItems() {
+      productsGrid.innerHTML = '';
+      if (shopItems.length === 0) {
+        productsGrid.innerHTML = '<p>Brak produktów w sklepie.</p>';
+        return;
+      }
+      shopItems.forEach(item => {
+        const productCard = document.createElement('div');
+        productCard.classList.add('product-card');
+        productCard.innerHTML = `
+<h3>${item.name}</h3>
+<p>${item.description}</p>
+<span class="price">$${item.price.toFixed(2)}</span>
+<p>Dostępnych: ${item.stockQuantity}</p>
+<button data-item-id="${item.id}">Dodaj do koszyka</button>
+`;
+        productCard.querySelector('button').addEventListener('click', () => addItemToCart(item.id));
+        productsGrid.appendChild(productCard);
+      });
+    }
+
+    async function fetchCartItems() {
+      try {
+        if (!currentUserId) {
+          console.warn("Brak User ID do pobrania koszyka.");
+          userCartItems = [];
+          return;
+        }
+        userCartItems = await fetchData(`/api/cart?userId=${currentUserId}`);
+      } catch (error) {
+        console.error('Błąd podczas pobierania przedmiotów koszyka:', error);
+        userCartItems = [];
+      }
+    }
+
+    function renderCart() {
+      modalCartItemsList.innerHTML = '';
+      let totalValue = 0;
+      let itemCount = 0;
+
+      if (userCartItems.length === 0) {
+        modalCartItemsList.innerHTML = '<li>Twój koszyk jest pusty.</li>';
+      } else {
+        userCartItems.forEach(item => {
+          const listItem = document.createElement('li');
+          listItem.classList.add('cart-item');
+          const itemTotal = item.price * item.quantity;
+          listItem.innerHTML = `
+<span>${item.name} (Ilość: ${item.quantity}) - $${item.price.toFixed(2)}</span>
+<span>$${itemTotal.toFixed(2)}</span>
+<button data-item-id="${item.itemId}" class="remove-from-cart-button">Usuń</button>
+`;
+          listItem.querySelector('.remove-from-cart-button').addEventListener('click', () => removeItemFromCart(item.itemId));
+          modalCartItemsList.appendChild(listItem);
+          totalValue += itemTotal;
+          itemCount += item.quantity;
+        });
+      }
+      cartItemCountSpan.textContent = itemCount;
+      cartTotalValueSpan.textContent = `$${totalValue.toFixed(2)}`;
+    }
+
+    async function addItemToCart(itemId) {
+      if (!currentUserId) {
+        alert('Musisz być zalogowany, aby dodać przedmiot do koszyka.');
+        window.location.href = 'index.html'; // Przekieruj do logowania
+        return;
+      }
+
+      try {
+        await fetchData('/api/cart/add', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({userId: parseInt(currentUserId), itemId: itemId, quantity: 1})
+        });
+        alert('Przedmiot dodany do koszyka!');
+        await updateCartDisplay();
+      } catch (error) {
+        console.error('Błąd podczas dodawania przedmiotu do koszyka:', error);
+        alert('Nie udało się dodać przedmiotu do koszyka. ' + error.message);
+      }
+    }
+
+    async function removeItemFromCart(itemId) {
+      if (!currentUserId) {
+        alert('Musisz być zalogowany.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        await fetchData('/api/cart/remove', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({userId: parseInt(currentUserId), itemId: itemId})
+        });
+        alert('Przedmiot usunięty z koszyka!');
+        await updateCartDisplay();
+      } catch (error) {
+        console.error('Błąd podczas usuwania przedmiotu z koszyka:', error);
+        alert('Nie udało się usunąć przedmiotu z koszyka. ' + error.message);
+      }
+    }
+
+    async function handleClearCart() {
+      if (!currentUserId) {
+        alert('Musisz być zalogowany.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      if (!confirm('Czy na pewno chcesz wyczyścić koszyk?')) {
+        return;
+      }
+
+      try {
+        await fetchData('/api/cart/clear', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({userId: parseInt(currentUserId)})
+        });
+        alert('Koszyk został wyczyszczony!');
+        await updateCartDisplay();
+        cartModal.style.display = 'none';
+      } catch (error) {
+        console.error('Błąd podczas czyszczenia koszyka:', error);
+        alert('Nie udało się wyczyścić koszyka. ' + error.message);
+      }
+    }
+
+    async function handlePlaceOrder() {
+      if (!currentUserId) {
+        alert('Musisz być zalogowany, aby złożyć zamówienie.');
+        window.location.href = 'index.html';
+        return;
+      }
+      if (userCartItems.length === 0) {
+        alert('Twój koszyk jest pusty. Dodaj przedmioty przed złożeniem zamówienia.');
+        return;
+      }
+      if (!confirm('Czy na pewno chcesz złożyć zamówienie?')) {
+        return;
+      }
+
+      try {
+        const response = await fetchData('/api/orders/place', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({userId: parseInt(currentUserId)})
+        });
+        alert('Zamówienie zostało złożone! Dziękujemy za zakupy.');
+        await updateCartDisplay();
+        fetchShopItems(); cartModal.style.display = 'none';
+      } catch (error) {
+        console.error('Błąd podczas składania zamówienia:', error);
+        alert('Nie udało się złożyć zamówienia. ' + error.message);
+      }
+    }
+
+    async function updateCartDisplay() {
+      await fetchCartItems();
+      renderCart();
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('userId');
+      window.location.href = 'index.html';
+    }
+
+    async function initApp() {
+      const urlParams = new URLSearchParams(window.location.search);
+      currentUserId = urlParams.get('userId') || localStorage.getItem('userId');
+
+      if (!currentUserId) {
+        window.location.href = '/index.html';
+        return;
+      }
+      localStorage.setItem('userId', currentUserId);
+
+      await Promise.all([fetchShopItems(), updateCartDisplay()]);
+    }
+
+    cartButton.addEventListener('click', () => {
+      cartModal.style.display = 'flex';
+    });
+
+    closeCart.addEventListener('click', () => {
+      cartModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === cartModal) {
+        cartModal.style.display = 'none';
+      }
+    });
+
+    orderButton.addEventListener('click', handlePlaceOrder);
+    clearCartButton.addEventListener('click', handleClearCart);
+    logoutButton.addEventListener('click', handleLogout);
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
 </body>
 
 </html>

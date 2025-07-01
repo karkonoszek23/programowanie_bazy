@@ -86,7 +86,7 @@ BEGIN
 		FROM 
 			UserCredentials UC
 		WHERE
-			UC.login = login
+			TRIM(UC.login) = TRIM(login)
 		);
 	RETURN user_id;
 END //

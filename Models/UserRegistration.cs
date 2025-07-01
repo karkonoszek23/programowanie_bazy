@@ -1,11 +1,13 @@
 using System;
 using MD5;
 using System.Text.RegularExpressions;
+using Requests;
+
 namespace Validation
 {
     public class UserRegistration
     {
-        private string Login { get; set; }
+        private string Username { get; set; }
         private string Email { get; set; }
         private string Password { get; set; }
         private string Name { get; set; }
@@ -17,7 +19,7 @@ namespace Validation
 
         public UserRegistration(RegisterRequest req)
         {
-            this.Login = req.Username;
+            this.Username = req.Username;
             this.Password = req.Password;
             this.Email = req.Email;
             this.Name = req.Name;
@@ -26,13 +28,12 @@ namespace Validation
             this.Gender = req.Gender;
             this.PhoneNumber = req.PhoneNumber;
             this.Address = req.Address;
-            if (AmIGood().Equals(0))
-                Hash();
+            Hash();
         }
 
         public bool IsLoginPasswdCorrectLength()
         {
-            return Login.Length > 6 && Password.Length > 8;
+            return Username.Length > 6 && Password.Length > 8;
         }
 
         public bool IsEmailCorrect()
@@ -53,8 +54,6 @@ namespace Validation
 
         public int AmIGood()
         {
-            // Zwraca kod, wiadomosc zbindowa bedzie w view modelu,
-            // jesli mamy blad.
             if (!IsLoginPasswdCorrectLength())
             {
                 return 1;
@@ -76,17 +75,16 @@ namespace Validation
 
         private void Hash()
         {
-            string encryptedLogin = Md5.Encrypt(Login);
+            string encryptedLogin = Md5.Encrypt(Username);
             string encryptedPassword = Md5.Encrypt(Password);
-            Login = encryptedLogin;
+            Username = encryptedLogin;
             Password = encryptedPassword;
         }
 
         public string[] FetchFields()
         {
-            return [Login, Password, Email, Name, LastName, Birthday, Gender,
+            return [Username, Password, Email, Name, LastName, Birthday, Gender,
                                                         PhoneNumber, Address];
         }
-
     }
 }
