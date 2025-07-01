@@ -54,11 +54,11 @@ public class DBConnection
     {
         string query = @"
             SELECT 
-                user_id 
+            user_id 
             FROM 
-                UserCredentials UC
+            UserCredentials UC
             WHERE
-                UC.login = @login
+            UC.login = @login
             ";
         using (MySqlConnection conn = GetConnection())
         {
@@ -105,7 +105,6 @@ public class DBConnection
                     command.Parameters.AddWithValue("@gender", userData[6]);
                     command.Parameters.AddWithValue("@phone_number", Convert.ToInt32(userData[7]));
                     command.Parameters.AddWithValue("@address", userData[8]);
-
                     command.ExecuteNonQuery();
                 }
             }
@@ -127,20 +126,20 @@ public class DBConnection
         var cartItems = new List<CartItem>();
         string query = @"
             SELECT
-                CI.itemid AS item_id,
-                IS_.name AS product_name,
-                IS_.description,
-                IS_.price,
-                CI.quantity,
-                (IS_.price * CI.quantity) AS total_item_price
+            CI.id AS item_id,
+        IS_.name AS product_name,
+        IS_.description,
+        IS_.price,
+        CI.quantity,
+        (IS_.price * CI.quantity) AS total_item_price
             FROM
-                CartItems CI
+            CartItems CI
             JOIN
-                ItemsInShop IS_ ON CI.itemid = IS_.id
+            ItemsInShop IS_ ON CI.id = IS_.id
             JOIN
-                Carts C ON CI.cartid = C.id
+            Carts C ON CI.cartid = C.id
             WHERE
-                C.userid = @userId AND C.status = 'Pending';";
+            C.userid = @userId AND C.status = 'Pending';";
 
         using (MySqlConnection conn = GetConnection())
         {
@@ -181,19 +180,19 @@ public class DBConnection
         CartInfo cartInfo = null;
         string query = @"
             SELECT
-                C.id AS cart_id,
-                COUNT(CI.itemid) AS item_count,
-                COALESCE(SUM(IS.price * CI.quantity), 0) AS total_value
+            C.id AS cartid,
+        COUNT(CI.id) AS item_count,
+        COALESCE(SUM(IIS.price * CI.quantity), 0) AS total
             FROM
-                Carts C
+            Carts C
             LEFT JOIN
-                CartItems CI ON C.id = CI.cartid
+            CartItems CI ON C.id = CI.cartid
             LEFT JOIN
-                ItemsInShop IS ON CI.itemid = IS.id
+            ItemsInShop IIS ON CI.id = IIS.id
             WHERE
-                C.userid = @userId AND C.status = 'Pending'
-            GROUP BY
-                C.id";
+            C.userid = @userId AND C.status = 'Pending';
+        GROUP BY
+            C.id;";
 
         using (MySqlConnection conn = GetConnection())
         {
@@ -303,7 +302,7 @@ public class DBConnection
             SET quantity = GREATEST(0, quantity - @quantity)
             WHERE itemid = @itemId AND cartid = @cartId;
 
-            DELETE FROM CartItems WHERE quantity = 0 AND cartid = @cartId;";
+        DELETE FROM CartItems WHERE quantity = 0 AND cartid = @cartId;";
 
         using (MySqlConnection conn = GetConnection())
         {
@@ -544,17 +543,17 @@ public class DBConnection
         var orderItems = new List<OrderItem>();
         string query = @"
             SELECT
-                OI.itemid,
-                IS.name AS product_name,
-                OI.quantity,
-                OI.price AS item_price,
-                (OI.quantity * OI.price) AS total_item_price
+            OI.itemid,
+        IS.name AS product_name,
+        OI.quantity,
+        OI.price AS item_price,
+        (OI.quantity * OI.price) AS total_item_price
             FROM
-                OrderItems OI
+            OrderItems OI
             JOIN
-                ItemsInShop IS ON OI.itemid = IS.id
+            ItemsInShop IS ON OI.itemid = IS.id
             WHERE
-                OI.orderid = @orderId";
+            OI.orderid = @orderId";
 
         using (MySqlConnection conn = GetConnection())
         {

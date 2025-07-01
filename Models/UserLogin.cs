@@ -20,7 +20,7 @@ namespace Validation
 
         public string[] FetchFields()
         {
-            return [Username, Password]; // Returns Username
+            return [Username, Password];
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Validation
             this.Gender = req.Gender;
             this.PhoneNumber = req.PhoneNumber;
             this.Address = req.Address;
-            // Removed Hash() call from constructor. Hashing should be done before persistence.
+            Hash();
         }
 
         public bool IsLoginPasswdCorrectLength()
@@ -55,8 +55,6 @@ namespace Validation
 
         public int AmIGood()
         {
-            // Zwraca kod, wiadomosc zbindowa bedzie w view modelu,
-            // jesli mamy blad.
             if (!IsLoginPasswdCorrectLength())
             {
                 return 1;
@@ -78,15 +76,14 @@ namespace Validation
 
         private void Hash()
         {
-            string encryptedLogin = Md5.Encrypt(Username); // Uses Username
+            string encryptedLogin = Md5.Encrypt(Username);
             string encryptedPassword = Md5.Encrypt(Password);
-            Username = encryptedLogin; // Updates Username
+            Username = encryptedLogin;
             Password = encryptedPassword;
         }
 
         public string[] FetchFields()
         {
-            Hash(); // Call Hash before fetching fields for persistence
             return [Username, Password, Email, Name, LastName, Birthday, Gender,
                                                         PhoneNumber, Address];
         }

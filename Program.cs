@@ -16,18 +16,18 @@ app.MapPost("/api/login", async (LoginRequest req) =>
 
     if (dbcontext.LoginUser(login, passwd))
     {
-        Console.WriteLine("Zalogowano uzytkownika.");
-        // Pobierz prawdziwe ID użytkownika
+        Console.WriteLine($"Logowanie: {login}.");
+
         int userId = dbcontext.GetUserId(login);
         return Results.Ok(new
         {
-            message = "Logowanie udane!",
-            token = "jakis_token_jwt",
-            userId = userId // Używamy rzeczywistego ID użytkownika
+            message = "Poprawnie zalogowano.",
+            userId = userId
         });
     }
     else
     {
+        Console.WriteLine($"Logowanie niepowiodlo sie: {login}\n{passwd}");
         return Results.Unauthorized();
     }
 })
@@ -48,24 +48,25 @@ app.MapPost("/api/register", async (RegisterRequest req) =>
     string gender = fields[6];
     string phoneNumber = fields[7];
     string address = fields[8];
+    Console.WriteLine($"Registration: {login} {password}");
 
     int validationResult = user.AmIGood();
     if (validationResult != 0)
     {
-        string errorMessage = "Nieznany błąd rejestracji.";
+        string errorMessage = "Błąd rejestracji.";
         switch (validationResult)
         {
             case 1:
                 errorMessage = "Login musi mieć więcej niż 6 znaków, a hasło więcej niż 8.";
                 break;
             case 2:
-                errorMessage = "Nieprawidłowy format adresu email.";
+                errorMessage = "Nieprawidłowy adres email.";
                 break;
             case 3:
-                errorMessage = "Nieprawidłowa płeć. Dozwolone: M, K, N.";
+                errorMessage = "Wybrano niepoprawnie plec.";
                 break;
             case 4:
-                errorMessage = "Nieprawidłowy numer telefonu (musi mieć 9 cyfr).";
+                errorMessage = "Nieprawidłowy numer telefonu.";
                 break;
         }
         return Results.BadRequest(new { message = errorMessage });
@@ -73,13 +74,9 @@ app.MapPost("/api/register", async (RegisterRequest req) =>
 
     try
     {
-        // POPRAWKA: Przekazanie tablicy string[] do RegisterUser
         bool success = false;
-        // Sprawdź czy użytkownik już istnieje przed próbą rejestracji
-        if (!dbcontext.LoginUser(login, password)) // Proste sprawdzenie, czy login nie istnieje (zakładając, że LoginUser zwraca false dla nieistniejących)
+        if (!dbcontext.LoginUser(login, password))
         {
-            // W Database.cs RegisterUser nie zwraca bool, rzuca wyjątki.
-            // Zmieniam wywołanie, aby obsłużyć wyjątki i zwracać odpowiedni Results.
             dbcontext.RegisterUser(user.FetchFields());
             success = true;
         }
@@ -91,8 +88,8 @@ app.MapPost("/api/register", async (RegisterRequest req) =>
 
         if (success)
         {
-            Console.WriteLine($"Zarejestrowano użytkownika: {login}");
-            return Results.Ok(new { message = "Rejestracja zakończona sukcesem!" });
+            Console.WriteLine($"Rejestracja użytkownika: {login}");
+            return Results.Ok(new { message = "Rejestracja zakończona pomyslnie!" });
         }
         else
         {
@@ -102,9 +99,7 @@ app.MapPost("/api/register", async (RegisterRequest req) =>
     catch (MySql.Data.MySqlClient.MySqlException ex)
     {
         Console.Error.WriteLine($"Błąd bazy danych podczas rejestracji: {ex.Message}");
-        // W zależności od typu błędu MySqlException, możesz zwrócić bardziej specyficzną wiadomość.
-        // Np. Duplicate entry dla unikalnych kluczy.
-        if (ex.Number == 1062) // MySQL error code for duplicate entry
+        if (ex.Number == 1062)
         {
             return Results.Conflict(new { message = "Użytkownik o podanym loginie lub emailu już istnieje." });
         }
@@ -112,29 +107,25 @@ app.MapPost("/api/register", async (RegisterRequest req) =>
     }
     catch (FormatException ex)
     {
-        Console.Error.WriteLine($"Błąd formatu danych podczas rejestracji użytkownika: {ex.Message}. Sprawdź format daty urodzenia i numeru telefonu.");
         return Results.BadRequest(new { message = "Nieprawidłowy format daty urodzenia lub numeru telefonu." });
     }
     catch (Exception ex)
     {
-        Console.Error.WriteLine($"Błąd podczas rejestracji: {ex.Message}");
+        Console.Error.WriteLine($"{ex.Message}");
         return Results.Problem(ex.Message);
     }
 })
 .WithName("Register")
 .WithOpenApi();
 
-// Inicjalizacja DBConnection (dla GetShopItems)
-// Ważne: W rzeczywistej aplikacji powinieneś używać wstrzykiwania zależności dla DBConnection,
-// a nie tworzyć nowej instancji za każdym razem.
-var database = new DBConnection("admin", "admin");
 
-// GET: /api/shop/items - Pobieranie wszystkich produktów w sklepie
 app.MapGet("/api/shop/items", () =>
 {
     try
     {
-        var items = database.GetShopItems();
+        var dbcontext = new DBConnection("admin", "admin");
+        var items = dbcontext.GetShopItems();
+        Console.WriteLine(items);
         return Results.Ok(items);
     }
     catch (Exception ex)
@@ -146,21 +137,18 @@ app.MapGet("/api/shop/items", () =>
 .WithName("GetShopItems")
 .WithOpenApi();
 
-// GET: /api/cart - Pobieranie zawartości koszyka dla danego użytkownika
-// GET: /api/cart - Pobieranie zawartości koszyka dla danego użytkownika
-app.MapGet("/api/cart", (int? userId) => // Zmieniono z 'int userId' na 'int? userId'
+app.MapGet("/api/cart", (int? userId) =>
 {
-    // Dodaj sprawdzenie, czy userId ma wartość
     if (!userId.HasValue)
     {
-        // Możesz zwrócić błąd Bad Request lub inny odpowiedni status
         return Results.BadRequest(new { message = "Identyfikator użytkownika (userId) jest wymagany." });
     }
 
     try
     {
-        // Użyj userId.Value, aby uzyskać rzeczywistą wartość int
-        var cartItems = database.GetCartItems(userId.Value);
+
+        var dbcontext = new DBConnection("admin", "admin");
+        var cartItems = dbcontext.GetCartItems(userId.Value);
         return Results.Ok(cartItems);
     }
     catch (Exception ex)
@@ -171,13 +159,12 @@ app.MapGet("/api/cart", (int? userId) => // Zmieniono z 'int userId' na 'int? us
 })
 .WithName("GetCart")
 .WithOpenApi();
-// POST: /api/cart/add - Dodawanie przedmiotu do koszyka
 app.MapPost("/api/cart/add", (CartUpdateItemRequest request) =>
 {
     try
     {
-        // Sprawdź, czy produkt istnieje i jest dostępny
-        var item = database.GetShopItemById(request.ItemId);
+        var dbcontext = new DBConnection("admin", "admin");
+        var item = dbcontext.GetShopItemById(request.ItemId);
         if (item == null)
         {
             return Results.NotFound(new { message = "Produkt nie znaleziony." });
@@ -187,7 +174,7 @@ app.MapPost("/api/cart/add", (CartUpdateItemRequest request) =>
             return Results.BadRequest(new { message = $"Brak wystarczającej ilości produktu {item.Name} w magazynie. Dostępne: {item.StockQuantity}." });
         }
 
-        var success = database.AddToCart(request.UserId, request.ItemId, request.Quantity);
+        var success = dbcontext.AddToCart(request.UserId, request.ItemId, request.Quantity);
         return success ? Results.Ok(new { message = "Przedmiot dodany do koszyka." }) : Results.BadRequest(new { message = "Nie udało się dodać przedmiotu do koszyka." });
     }
     catch (Exception ex)
@@ -199,14 +186,12 @@ app.MapPost("/api/cart/add", (CartUpdateItemRequest request) =>
 .WithName("AddToCart")
 .WithOpenApi();
 
-// POST: /api/cart/remove - Usuwanie przedmiotu z koszyka (lub zmniejszanie ilości)
 app.MapPost("/api/cart/remove", (CartUpdateItemRequest request) =>
 {
     try
     {
-        var db = new DBConnection("admin", "admin"); // Użyj istniejącego połączenia lub wstrzykiwania zależności
-        // W zależności od logiki biznesowej, możesz pozwolić na usunięcie określonej ilości lub całego przedmiotu
-        var success = db.RemoveFromCart(request.UserId, request.ItemId, request.Quantity); // Zakładam, że ta metoda obsługuje ilość
+        var dbcontext = new DBConnection("admin", "admin");
+        var success = dbcontext.RemoveFromCart(request.UserId, request.ItemId, request.Quantity);
         return success ? Results.Ok(new { message = "Przedmiot usunięty z koszyka." }) : Results.BadRequest(new { message = "Nie udało się usunąć przedmiotu z koszyka." });
     }
     catch (Exception ex)
@@ -218,13 +203,12 @@ app.MapPost("/api/cart/remove", (CartUpdateItemRequest request) =>
 .WithName("RemoveFromCart")
 .WithOpenApi();
 
-// POST: /api/cart/clear - Czyszczenie całego koszyka
 app.MapPost("/api/cart/clear", (CartUserRequest request) =>
 {
     try
     {
-        var db = new DBConnection("admin", "admin"); // Użyj istniejącego połączenia lub wstrzykiwania zależności
-        var success = db.ClearCart(request.UserId);
+        var dbcontext = new DBConnection("admin", "admin");
+        var success = dbcontext.ClearCart(request.UserId);
         return success ? Results.Ok(new { message = "Koszyk został wyczyszczony." }) : Results.BadRequest(new { message = "Nie udało się wyczyścić koszyka." });
     }
     catch (Exception ex)
@@ -236,24 +220,20 @@ app.MapPost("/api/cart/clear", (CartUserRequest request) =>
 .WithName("ClearCart")
 .WithOpenApi();
 
-// POST: /api/orders/place - Składanie zamówienia
 app.MapPost("/api/orders/place", (OrderPlaceRequest request) =>
 {
     try
     {
-        var db = new DBConnection("admin", "admin"); // Użyj istniejącego połączenia lub wstrzykiwania zależności
-        var cartItems = db.GetCartItems(request.UserId);
+        var dbcontext = new DBConnection("admin", "admin");
+        var cartItems = dbcontext.GetCartItems(request.UserId);
 
         if (cartItems == null || cartItems.Count == 0)
         {
             return Results.BadRequest(new { message = "Koszyk jest pusty. Nie można złożyć zamówienia." });
         }
 
-        // Możesz dodać logikę weryfikacji dostępności produktów przed złożeniem zamówienia
-        // oraz aktualizację stanu magazynowego po złożeniu zamówienia.
 
-        // POPRAWKA: Zmiana PlaceOrderFromCart na PlaceOrder
-        bool success = db.PlaceOrder(request.UserId); // Ta metoda powinna przenieść przedmioty z koszyka do zamówienia i wyczyścić koszyk
+        bool success = dbcontext.PlaceOrder(request.UserId);
 
         if (success)
         {
@@ -273,23 +253,19 @@ app.MapPost("/api/orders/place", (OrderPlaceRequest request) =>
 .WithName("PlaceOrder")
 .WithOpenApi();
 
-// Middleware do sprawdzania autoryzacji (prosty przykład, w rzeczywistej aplikacji użyj JWT)
 app.Use(async (context, next) =>
 {
-    // Jeśli ścieżka zaczyna się od /api/, ale nie jest /api/login ani /api/register
     if (context.Request.Path.StartsWithSegments("/api") &&
         !context.Request.Path.StartsWithSegments("/api/login") &&
         !context.Request.Path.StartsWithSegments("/api/register"))
     {
-        // Sprawdź, czy userId jest w parametrach zapytania dla innych endpointów API
         var userId = context.Request.Query["userId"].ToString();
         if (string.IsNullOrEmpty(userId))
         {
-            context.Response.StatusCode = 401; // Unauthorized
+            context.Response.StatusCode = 401;
             await context.Response.WriteAsync("Unauthorized: User ID required.");
             return;
         }
-        // W bardziej zaawansowanych scenariuszach tutaj byłaby walidacja tokena JWT
     }
 
     await next();
@@ -300,6 +276,5 @@ app.MapGet("/", (HttpContext context) =>
 {
     context.Response.Redirect("/index.html");
 });
-
 
 app.Run();
