@@ -1,14 +1,13 @@
-// UserRegistration.cs
 using System;
 using MD5;
 using System.Text.RegularExpressions;
-using Requests; // Add this using directive
+using Requests;
 
 namespace Validation
 {
     public class UserRegistration
     {
-        private string Username { get; set; } // Changed Login to Username
+        private string Username { get; set; }
         private string Email { get; set; }
         private string Password { get; set; }
         private string Name { get; set; }
@@ -20,7 +19,7 @@ namespace Validation
 
         public UserRegistration(RegisterRequest req)
         {
-            this.Username = req.Username; // Uses req.Username
+            this.Username = req.Username;
             this.Password = req.Password;
             this.Email = req.Email;
             this.Name = req.Name;
@@ -34,7 +33,7 @@ namespace Validation
 
         public bool IsLoginPasswdCorrectLength()
         {
-            return Username.Length > 6 && Password.Length > 8; // Uses Username
+            return Username.Length > 6 && Password.Length > 8;
         }
 
         public bool IsEmailCorrect()

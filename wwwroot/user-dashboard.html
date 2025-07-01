@@ -7,10 +7,7 @@
   <title>Panel Sklepu</title>
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800&display=swap" rel="stylesheet" />
   <style>
-    <style>
-
-    /* Stylowanie CSS */
-    * {
+    <style>* {
       box-sizing: border-box;
     }
 
@@ -35,7 +32,6 @@
       margin-bottom: 30px;
     }
 
-    /* Style dla przycisków w nagłówku */
     header button {
       border: none;
       padding: 8px 15px;
@@ -45,26 +41,20 @@
       font-size: 0.9em;
       font-weight: bold;
       white-space: nowrap;
-      /* Zapobiega zawijaniu tekstu */
     }
 
-    /* Style dla przycisku koszyka */
     .cart-button {
       background-color: #007bff;
-      /* Podstawowy kolor akcji */
       color: white;
       margin-right: 10px;
-      /* Odstęp od przycisku wylogowania */
     }
 
     .cart-button:hover {
       background-color: #0056b3;
     }
 
-    /* Style dla przycisku wylogowania */
     .logout-button {
       background-color: #6c757d;
-      /* Kolor drugorzędny/neutralny */
       color: white;
     }
 
@@ -122,21 +112,14 @@
 
     .cart-modal {
       display: none;
-      /* Hidden by default */
       position: fixed;
-      /* Stay in place */
       z-index: 1;
-      /* Sit on top */
       left: 0;
       top: 0;
       width: 100%;
-      /* Full width */
       height: 100%;
-      /* Full height */
       overflow: auto;
-      /* Enable scroll if needed */
       background-color: rgba(0, 0, 0, 0.7);
-      /* Black w/ opacity */
       justify-content: center;
       align-items: center;
     }
@@ -257,9 +240,8 @@
 
   <script>
     let currentUserId = null;
-    let shopItems = []; // Przechowuje listę wszystkich produktów w sklepie
-    let userCartItems = []; // Przechowuje aktualne elementy koszyka użytkownika
-
+    let shopItems = [];
+    let userCartItems = [];
     const productsGrid = document.getElementById('productsGrid');
     const cartButton = document.getElementById('cartButton');
     const logoutButton = document.getElementById('logoutButton');
@@ -271,11 +253,9 @@
     const clearCartButton = document.getElementById('clearCartButton');
     const orderButton = document.getElementById('orderButton');
 
-    // Funkcja pomocnicza do wykonywania zapytań HTTP
     async function fetchData(url, options = {}) {
       const response = await fetch(url, options);
       if (!response.ok) {
-        // Spróbuj odczytać wiadomość o błędzie z odpowiedzi, jeśli dostępna
         const errorText = await response.text();
         try {
           const errorJson = JSON.parse(errorText);
@@ -287,11 +267,9 @@
       return response.json();
     }
 
-    // Funkcja do pobierania produktów ze sklepu
     async function fetchShopItems() {
       try {
-        // Zakładamy, że masz endpoint API '/api/shop/items'
-        shopItems = await fetchData('/api/shop/items'); // Endpoint do pobierania wszystkich ItemsInShop
+        shopItems = await fetchData('/api/shop/items');
         renderShopItems();
       } catch (error) {
         console.error('Błąd podczas pobierania produktów sklepu:', error);
@@ -299,7 +277,6 @@
       }
     }
 
-    // Funkcja do renderowania produktów sklepu
     function renderShopItems() {
       productsGrid.innerHTML = '';
       if (shopItems.length === 0) {
@@ -310,18 +287,17 @@
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.innerHTML = `
-          <h3>${item.name}</h3>
-          <p>${item.description}</p>
-          <span class="price">$${item.price.toFixed(2)}</span>
-          <p>Dostępnych: ${item.stockQuantity}</p>
-          <button data-item-id="${item.id}">Dodaj do koszyka</button>
-        `;
+<h3>${item.name}</h3>
+<p>${item.description}</p>
+<span class="price">$${item.price.toFixed(2)}</span>
+<p>Dostępnych: ${item.stockQuantity}</p>
+<button data-item-id="${item.id}">Dodaj do koszyka</button>
+`;
         productCard.querySelector('button').addEventListener('click', () => addItemToCart(item.id));
         productsGrid.appendChild(productCard);
       });
     }
 
-    // Funkcja do pobierania zawartości koszyka użytkownika
     async function fetchCartItems() {
       try {
         if (!currentUserId) {
@@ -329,15 +305,13 @@
           userCartItems = [];
           return;
         }
-        // Zakładamy, że masz endpoint API '/api/cart?userId=X'
         userCartItems = await fetchData(`/api/cart?userId=${currentUserId}`);
       } catch (error) {
         console.error('Błąd podczas pobierania przedmiotów koszyka:', error);
-        userCartItems = []; // W przypadku błędu, koszyk jest pusty
+        userCartItems = [];
       }
     }
 
-    // Funkcja do renderowania koszyka w modalu
     function renderCart() {
       modalCartItemsList.innerHTML = '';
       let totalValue = 0;
@@ -351,10 +325,10 @@
           listItem.classList.add('cart-item');
           const itemTotal = item.price * item.quantity;
           listItem.innerHTML = `
-            <span>${item.name} (Ilość: ${item.quantity}) - $${item.price.toFixed(2)}</span>
-            <span>$${itemTotal.toFixed(2)}</span>
-            <button data-item-id="${item.itemId}" class="remove-from-cart-button">Usuń</button>
-          `;
+<span>${item.name} (Ilość: ${item.quantity}) - $${item.price.toFixed(2)}</span>
+<span>$${itemTotal.toFixed(2)}</span>
+<button data-item-id="${item.itemId}" class="remove-from-cart-button">Usuń</button>
+`;
           listItem.querySelector('.remove-from-cart-button').addEventListener('click', () => removeItemFromCart(item.itemId));
           modalCartItemsList.appendChild(listItem);
           totalValue += itemTotal;
@@ -365,7 +339,6 @@
       cartTotalValueSpan.textContent = `$${totalValue.toFixed(2)}`;
     }
 
-    // Funkcja do dodawania przedmiotu do koszyka
     async function addItemToCart(itemId) {
       if (!currentUserId) {
         alert('Musisz być zalogowany, aby dodać przedmiot do koszyka.');
@@ -374,7 +347,6 @@
       }
 
       try {
-        // Zakładamy, że masz endpoint API '/api/cart/add'
         await fetchData('/api/cart/add', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -388,7 +360,6 @@
       }
     }
 
-    // Funkcja do usuwania przedmiotu z koszyka
     async function removeItemFromCart(itemId) {
       if (!currentUserId) {
         alert('Musisz być zalogowany.');
@@ -397,7 +368,6 @@
       }
 
       try {
-        // Zakładamy, że masz endpoint API '/api/cart/remove'
         await fetchData('/api/cart/remove', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -411,7 +381,6 @@
       }
     }
 
-    // Funkcja do czyszczenia koszyka
     async function handleClearCart() {
       if (!currentUserId) {
         alert('Musisz być zalogowany.');
@@ -424,7 +393,6 @@
       }
 
       try {
-        // Zakładamy, że masz endpoint API '/api/cart/clear'
         await fetchData('/api/cart/clear', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -432,14 +400,13 @@
         });
         alert('Koszyk został wyczyszczony!');
         await updateCartDisplay();
-        cartModal.style.display = 'none'; // Zamknij modal po wyczyszczeniu
+        cartModal.style.display = 'none';
       } catch (error) {
         console.error('Błąd podczas czyszczenia koszyka:', error);
         alert('Nie udało się wyczyścić koszyka. ' + error.message);
       }
     }
 
-    // Funkcja do składania zamówienia
     async function handlePlaceOrder() {
       if (!currentUserId) {
         alert('Musisz być zalogowany, aby złożyć zamówienie.');
@@ -455,53 +422,43 @@
       }
 
       try {
-        // Zakładamy, że masz endpoint API '/api/orders/place'
         const response = await fetchData('/api/orders/place', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({userId: parseInt(currentUserId)})
         });
         alert('Zamówienie zostało złożone! Dziękujemy za zakupy.');
-        await updateCartDisplay(); // Odśwież koszyk (powinien być teraz pusty lub zmieniony status)
-        fetchShopItems(); // Odśwież produkty w sklepie (ilość na stanie mogła się zmienić)
-        cartModal.style.display = 'none'; // Zamknij modal
+        await updateCartDisplay();
+        fetchShopItems(); cartModal.style.display = 'none';
       } catch (error) {
         console.error('Błąd podczas składania zamówienia:', error);
         alert('Nie udało się złożyć zamówienia. ' + error.message);
       }
     }
 
-    // Funkcja do aktualizacji wyświetlania koszyka
     async function updateCartDisplay() {
       await fetchCartItems();
       renderCart();
     }
 
-    // Funkcja do obsługi wylogowania
     function handleLogout() {
-      localStorage.removeItem('userId'); // Usuń ID użytkownika z local storage
-      window.location.href = 'index.html'; // Przekieruj do strony logowania
+      localStorage.removeItem('userId');
+      window.location.href = 'index.html';
     }
 
-    // Inicjalizacja aplikacji po załadowaniu DOM
     async function initApp() {
       const urlParams = new URLSearchParams(window.location.search);
-      // Preferuj userId z URL (jeśli przekazany po logowaniu), w przeciwnym razie z localStorage
       currentUserId = urlParams.get('userId') || localStorage.getItem('userId');
 
       if (!currentUserId) {
-        // Jeśli brak userId, przekieruj do strony logowania
         window.location.href = '/index.html';
         return;
       }
-      // Zapisz userId w localStorage na przyszłość (np. odświeżenie strony)
       localStorage.setItem('userId', currentUserId);
 
-      // Równoległe pobieranie danych
       await Promise.all([fetchShopItems(), updateCartDisplay()]);
     }
 
-    // Event Listenery
     cartButton.addEventListener('click', () => {
       cartModal.style.display = 'flex';
     });
@@ -510,7 +467,6 @@
       cartModal.style.display = 'none';
     });
 
-    // Zamknięcie modala po kliknięciu poza nim
     window.addEventListener('click', (e) => {
       if (e.target === cartModal) {
         cartModal.style.display = 'none';
